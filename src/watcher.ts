@@ -1,29 +1,45 @@
 import { Watcher } from 'casbin';
 import { RedisConnection } from './redis';
+import { RedisOptions } from 'ioredis';
 
-export default class RedisWatcher implements Watcher {
-  private pubConnection!: RedisConnection;
-  private subConnection!: RedisConnection;
+export interface Options extends RedisOptions {
+  channel?: string;
+}
+
+export class RedisWatcher implements Watcher {
+  private pubConnection: RedisConnection;
+  private subConnection: RedisConnection;
   private callback: () => void;
+  private channel = 'casbin';
 
-  public static async newWatcher(uri: string): Promise<RedisWatcher> {
-    const watcher = new RedisWatcher(uri);
-    await Promise.all([watcher.pubConnection.open(), watcher.subConnection.open()]);
-    return watcher;
+  public static async newWatcher(options?: Options | string): Promise<RedisWatcher> {
+    return new RedisWatcher(options);
   }
 
-  constructor(uri: string) {
-    this.pubConnection = new RedisConnection(uri);
-    this.subConnection = new RedisConnection(uri);
+  private constructor(options?: Options | string) {
+    if (typeof options === 'object' && options.channel) {
+      this.channel = options.channel;
+    }
+
+    this.pubConnection = new RedisConnection(options);
+    this.subConnection = new RedisConnection(options);
+    this.pubConnection.open();
+    this.subConnection.open();
+
+    this.subConnection.redisClient.subscribe(this.channel).catch(() => {});
+    this.subConnection.redisClient.on('message', (channel, message) => {
+      if (channel !== this.channel) {
+        return;
+      }
+      if (this.callback) {
+        this.callback();
+      }
+    });
   }
 
   public async update(): Promise<boolean> {
-    try {
-      await this.pubConnection.redisClient.publish('change', 'casbin rules updated');
-      return true;
-    } catch (e) {
-      return false;
-    }
+    await this.pubConnection.redisClient.publish(this.channel, 'casbin rules updated');
+    return true;
   }
 
   public setUpdateCallback(callback: () => void) {
@@ -31,8 +47,7 @@ export default class RedisWatcher implements Watcher {
   }
 
   public async close(): Promise<void> {
-    const promise1 = this.pubConnection.close();
-    const promise2 = this.subConnection.close();
-    await Promise.all([promise1, promise2]);
+    this.pubConnection.close();
+    this.subConnection.close();
   }
 }

@@ -12,25 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import casbin from 'casbin';
-import RedisWatcher from '../src/watcher';
+import { newEnforcer } from 'casbin';
+import { RedisWatcher } from '../src/watcher';
 
-describe(('Test Watcher'), () => {
-  test('Test1', async () => {
-    const watcher = await RedisWatcher.newWatcher('redis://localhost:6379/5');
-    watcher.setUpdateCallback(() => console.log('[New revision detected: X]'));
-    const enforcer = await casbin.newEnforcer('examples/authz_model.conf', 'examples/authz_policy.csv');
-    enforcer.setWatcher(watcher);
-    await enforcer.savePolicy();
-  });
+test('Test1', async done => {
+  const watcher = await RedisWatcher.newWatcher('redis://localhost:6379/5');
+  const enforcer = await newEnforcer('examples/authz_model.conf', 'examples/authz_policy.csv');
+  enforcer.setWatcher(watcher);
+  watcher.setUpdateCallback(done);
+  await enforcer.savePolicy();
+  await watcher.close();
+});
 
-  test('Test2', async () => {
-    const updater = await RedisWatcher.newWatcher('redis://localhost:6379/5');
-    const watcher = await RedisWatcher.newWatcher('redis://localhost:6379/5');
-    watcher.setUpdateCallback(() => console.log('[New revision detected: X]'));
-    const enforcer = await casbin.newEnforcer('examples/authz_model.conf', 'examples/authz_policy.csv');
-    enforcer.setWatcher(watcher);
+test('Test2', async done => {
+  const watcher = await RedisWatcher.newWatcher('redis://localhost:6379/5');
+  const enforcer = await newEnforcer('examples/authz_model.conf', 'examples/authz_policy.csv');
+  enforcer.setWatcher(watcher);
+  watcher.setUpdateCallback(done);
 
-    await updater.update();
-  });
+  const updater = await RedisWatcher.newWatcher('redis://localhost:6379/5');
+  await updater.update();
+  await updater.close();
+
+  await watcher.close();
 });

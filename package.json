@@ -1,32 +1,32 @@
 {
-  "name": "redis-adapter",
+  "name": "redis-watcher",
   "version": "1.0.0",
   "description": "Redis watcher for node-casbin",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "lib/watcher.js",
+  "typings": "lib/watcher.d.ts",
   "scripts": {
     "prepack": "yarn run lint && yarn run test && yarn build",
     "postpack": "rimraf lib",
     "prettier": "prettier --write **/*.{ts,js}",
-    "build": "rimraf lib && tsc -p tsconfig.release.json",
+    "build": "rimraf lib && tsc -p tsconfig.json",
     "lint": "tslint -p . -c tslint.json",
     "test": "jest"
   },
   "devDependencies": {
-    "@types/ioredis": "^4.0.12",
+    "@types/ioredis": "^4.14.3",
     "@types/jest": "^24.0.11",
     "@types/node": "^10.5.3",
+    "casbin": "^3.0.8",
     "coveralls": "^3.0.2",
-    "jest": "^24.3.1",
+    "jest": "^24.9.0",
     "lint-staged": "^8.1.7",
     "prettier": "^1.17.1",
     "rimraf": "^2.6.2",
-    "ts-jest": "^24.0.0",
+    "ts-jest": "^24.2.0",
     "tslint": "^5.11.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.7.4"
   },
   "dependencies": {
-    "casbin": "^3.0.3",
     "ioredis": "^4.11.1"
   },
   "files": [
@@ -49,8 +49,5 @@
       "prettier --write",
       "git add"
     ]
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
   }
 }
