@@ -14,7 +14,7 @@ yarn add redis-watcher
 
 # Simple Example
 ```typescript
-import { RedisWatcher } from './lib/watcher';
+import { RedisWatcher } from 'redis-watcher';
 import { newEnforcer } from 'casbin';
 
 // Initialize the watcher.
