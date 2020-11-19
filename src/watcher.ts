@@ -1,34 +1,75 @@
 import { Watcher } from 'casbin';
-import { RedisConnection } from './redis';
-import { RedisOptions } from 'ioredis';
+import { RedisClusterConnection, RedisConnection } from './redis';
+import { ClusterNode, ClusterOptions, RedisOptions } from 'ioredis';
 
-export interface Options extends RedisOptions {
+export interface WatcherOptions extends RedisOptions {
+  channel?: string;
+}
+
+export interface WatcherClusterOptions extends ClusterOptions {
   channel?: string;
 }
 
 export class RedisWatcher implements Watcher {
-  private pubConnection: RedisConnection;
-  private subConnection: RedisConnection;
+  private pubConnection: RedisConnection | RedisClusterConnection;
+  private subConnection: RedisConnection | RedisClusterConnection;
   private callback: () => void;
   private channel = 'casbin';
 
-  public static async newWatcher(options?: Options | string): Promise<RedisWatcher> {
-    return new RedisWatcher(options);
-  }
-
-  private constructor(options?: Options | string) {
+  /**
+   * newWatcher creates a watcher on the single Redis.
+   * @param options - https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options
+   * @example
+   * newWatcher('redis://user:password@redis-service.com:6379')
+   * newWatcher('//localhost:6379')
+   * newWatcher({
+   *   port: 6379, // Redis port
+   *   host: "127.0.0.1", // Redis host
+   *   family: 4, // 4 (IPv4) or 6 (IPv6)
+   *   password: "auth",
+   *   db: 0,
+   *   channel: "casbin"
+   * })
+   */
+  public static async newWatcher(options?: WatcherOptions | string): Promise<RedisWatcher> {
+    let channel = '';
     if (typeof options === 'object' && options.channel) {
-      this.channel = options.channel;
+      channel = options.channel;
     }
 
-    this.pubConnection = new RedisConnection(options);
-    this.subConnection = new RedisConnection(options);
+    const pubConnection = new RedisConnection(options);
+    const subConnection = new RedisConnection(options);
+    return new RedisWatcher(pubConnection, subConnection, channel);
+  }
+
+  /**
+   * newWatcherCluster creates a watcher on the Redis cluster.
+   * @param nodes - An array of nodes in the cluster, [{ port: number, host: string }]
+   * @param clusterOptions - https://github.com/luin/ioredis/blob/master/API.md#new-clusterstartupnodes-options
+   * @example
+   * newWatcherCluster([{ port: 6380, host: "127.0.0.1"}, { port: 6381, host: "127.0.0.1"})
+   */
+  public static async newWatcherCluster(nodes: ClusterNode[] = [], clusterOptions: WatcherClusterOptions = {}): Promise<RedisWatcher> {
+    const pubConnection = new RedisClusterConnection(nodes, clusterOptions);
+    const subConnection = new RedisClusterConnection(nodes, clusterOptions);
+    return new RedisWatcher(pubConnection, subConnection, clusterOptions.channel);
+  }
+
+  private constructor(pubConnection: RedisConnection | RedisClusterConnection, subConnection: RedisConnection | RedisClusterConnection, channel?: string) {
+    this.pubConnection = pubConnection;
+    this.subConnection = subConnection;
+
+    if (channel) {
+      this.channel = channel;
+    }
+
     this.pubConnection.open();
     this.subConnection.open();
 
-    this.subConnection.redisClient.subscribe(this.channel).catch(() => {});
-    this.subConnection.redisClient.on('message', (channel, message) => {
-      if (channel !== this.channel) {
+    // @ts-ignore - subscribe exists.
+    this.subConnection.getRedisClient().subscribe(this.channel).catch(() => {});
+    this.subConnection.getRedisClient().on('message', (chan, message) => {
+      if (chan !== this.channel) {
         return;
       }
       if (this.callback) {
@@ -38,7 +79,8 @@ export class RedisWatcher implements Watcher {
   }
 
   public async update(): Promise<boolean> {
-    await this.pubConnection.redisClient.publish(this.channel, 'casbin rules updated');
+    // @ts-ignore - publish exists.
+    await this.pubConnection.getRedisClient().publish(this.channel, 'casbin rules updated');
     return true;
   }
 
