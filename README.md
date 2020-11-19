@@ -1,4 +1,4 @@
-# redis-watcher
+# Redis-watcher
 
 Redis watcher for node-casbin
 
@@ -6,15 +6,19 @@ Redis watcher for node-casbin
 
 ```shell script
 # NPM
-npm install --save redis-watcher
+npm install --save @casbin/redis-watcher
 
 # Yarn
-yarn add redis-watcher
+yarn add @casbin/redis-watcher
 ```
 
-# Simple Example
+**Note: redis-watcher has been deprecated on NPM.**
+
+# Example
+Using Redis:
+
 ```typescript
-import { RedisWatcher } from 'redis-watcher';
+import { RedisWatcher } from '@casbin/redis-watcher';
 import { newEnforcer } from 'casbin';
 
 // Initialize the watcher.
@@ -24,11 +28,20 @@ const watcher = await RedisWatcher.newWatcher('redis://localhost:6379/5');
 const enforcer = await newEnforcer('examples/authz_model.conf', 'examples/authz_policy.csv');
 
 enforcer.setWatcher(watcher);
+```
 
-// By default, the watcher's callback is automatically set to the
-// enforcer's loadPolicy() in the setWatcher() call.
-// We can change it by explicitly setting a callback.
-watcher.setUpdateCallback(() => console.log('Casbin need update'));
+Using Redis cluster:
 
+```typescript
+import { RedisWatcher } from '@casbin/redis-watcher';
+import { newEnforcer } from 'casbin';
+
+// Initialize the watcher.
+const watcher = await RedisWatcher.newWatcherWithCluster([{ port: 7000, host: 'localhost' }]);
+
+// Initialize the enforcer.
+const enforcer = await newEnforcer('examples/authz_model.conf', 'examples/authz_policy.csv');
+
+enforcer.setWatcher(watcher);
 ```
 

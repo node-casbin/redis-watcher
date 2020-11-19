@@ -1,0 +1,59 @@
+name: main
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [^10, ^12, ^14]
+    services:
+      # Label used to access the service container
+      redis:
+        # Docker Hub image
+        image: redis
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          -p 6379:6379
+          --name redis
+      redis-cluster:
+        image: grokzen/redis-cluster:4.0.8
+        options: >-
+          -p 7000:7000
+          -p 7001:7001
+          -p 7002:7002
+          -p 7003:7003
+          -p 7004:7004
+          -p 7005:7005
+          --name redis-cluster
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: yarn install --no-lockfile
+    - run: yarn lint
+
+    - run: docker logs redis
+    - run: docker logs redis-cluster
+
+    - run: yarn test
+
+  semantic-release:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run semantic-release
+        if: github.repository == 'node-casbin/redis-watcher' && github.event_name == 'push'
+        run: yarn install --no-lockfile & yarn semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
