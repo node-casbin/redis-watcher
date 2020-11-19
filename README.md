@@ -1,6 +1,6 @@
 # Redis-watcher
 
-Redis watcher for node-casbin
+Redis watcher for node-casbin based on [ioredis](https://github.com/luin/ioredis).
 
 # Installation
 
@@ -21,7 +21,7 @@ Using Redis:
 import { RedisWatcher } from '@casbin/redis-watcher';
 import { newEnforcer } from 'casbin';
 
-// Initialize the watcher.
+// Initialize the watcher, see https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options
 const watcher = await RedisWatcher.newWatcher('redis://localhost:6379/5');
 
 // Initialize the enforcer.
@@ -36,7 +36,7 @@ Using Redis cluster:
 import { RedisWatcher } from '@casbin/redis-watcher';
 import { newEnforcer } from 'casbin';
 
-// Initialize the watcher.
+// Initialize the watcher, see https://github.com/luin/ioredis/blob/master/API.md#new-clusterstartupnodes-options.
 const watcher = await RedisWatcher.newWatcherWithCluster([{ port: 7000, host: 'localhost' }]);
 
 // Initialize the enforcer.
