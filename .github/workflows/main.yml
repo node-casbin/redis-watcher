@@ -53,7 +53,7 @@ jobs:
 
       - name: Run semantic-release
         if: github.repository == 'node-casbin/redis-watcher' && github.event_name == 'push'
-        run: yarn install --no-lockfile & yarn semantic-release
+        run: yarn install --no-lockfile && yarn semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
