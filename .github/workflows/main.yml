@@ -21,7 +21,7 @@ jobs:
           -p 6379:6379
           --name redis
       redis-cluster:
-        image: grokzen/redis-cluster:4.0.8
+        image: grokzen/redis-cluster:6.2.0
         options: >-
           -p 7000:7000
           -p 7001:7001
