@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [^10, ^12, ^14]
+        node-version: [^12, ^14]
     services:
       # Label used to access the service container
       redis:
