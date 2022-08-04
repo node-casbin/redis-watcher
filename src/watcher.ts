@@ -84,12 +84,12 @@ export class RedisWatcher implements Watcher {
     return watcher;
   }
 
-  private constructor() {}
+  public constructor() {}
 
-  public async update(): Promise<boolean> {
+  public async update(msg?: string): Promise<boolean> {
     const client = await this.pubConnection.getRedisClient();
     // @ts-ignore - publish is exists.
-    await client.publish(this.channel, 'casbin rules updated');
+    await client.publish(this.channel, msg ? msg : 'casbin rules updated');
     return true;
   }
 
