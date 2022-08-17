@@ -1,6 +1,6 @@
 {
   "name": "@casbin/redis-watcher",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Redis watcher for node-casbin",
   "main": "lib/watcher.js",
   "typings": "lib/watcher.d.ts",
