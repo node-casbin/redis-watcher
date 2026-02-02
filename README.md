@@ -28,8 +28,8 @@ npm install @casbin/redis-watcher
 Using Redis:
 
 ```typescript
-import { newEnforcer } from 'casbin';
 import { RedisWatcher } from '@casbin/redis-watcher';
+import { newEnforcer } from 'casbin';
 
 async function myFunction() {
     // Initialize the watcher
@@ -52,8 +52,8 @@ async function myFunction() {
 Using Redis Cluster:
 
 ```typescript
-import { newEnforcer } from 'casbin';
 import { RedisWatcher } from '@casbin/redis-watcher';
+import { newEnforcer } from 'casbin';
 
 async function myFunction() {
     // Initialize the watcher with Redis cluster
