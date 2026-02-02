@@ -10,7 +10,9 @@
     "prettier": "prettier --write **/*.{ts,js}",
     "build": "rimraf lib && tsc -p tsconfig.json",
     "lint": "tslint -p . -c tslint.json",
-    "test": "jest --forceExit"
+    "test": "jest --forceExit",
+    "coverage": "jest --coverage --forceExit",
+    "release": "npx -p semantic-release -p @semantic-release/git -p @semantic-release/changelog semantic-release"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.1",
