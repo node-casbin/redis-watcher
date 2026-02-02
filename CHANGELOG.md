@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/node-casbin/redis-watcher/compare/v1.1.0...v1.2.0) (2026-02-02)
+
+
+### Features
+
+* fix bug that NPM released, but github not released ([#37](https://github.com/node-casbin/redis-watcher/issues/37)) ([a5f78ed](https://github.com/node-casbin/redis-watcher/commit/a5f78ede3f552c37351f1cf495f8ea49d86c5e0f))
+* fix CI build by pinning @types/babel__traverse for TypeScript 3.7.4 compatibility ([#39](https://github.com/node-casbin/redis-watcher/issues/39)) ([16afbd5](https://github.com/node-casbin/redis-watcher/commit/16afbd545544d1f53351caaa53a299910e21c34e))
+
 # [1.1.0](https://github.com/node-casbin/redis-watcher/compare/v1.0.2...v1.1.0) (2026-02-02)
 
 
